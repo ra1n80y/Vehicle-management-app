@@ -10,6 +10,8 @@ module com.godfrey.vehicle {
     requires jakarta.validation;
     requires java.sql;
     requires static lombok;
+    requires org.mapstruct;
+    requires java.compiler;
 
     // Open packages for reflection (Spring / JPA)
     opens com.godfrey.vehicle to spring.beans, spring.context, spring.boot;
@@ -22,5 +24,5 @@ module com.godfrey.vehicle {
     exports com.godfrey.vehicle.model;
     exports com.godfrey.vehicle.controller;
     exports com.godfrey.vehicle.service;
-    exports com.godfrey.vehicle.dto;   // <--- ADD THIS LINE
+    exports com.godfrey.vehicle.dto;
 }

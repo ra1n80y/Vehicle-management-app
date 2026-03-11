@@ -2,25 +2,27 @@ package com.godfrey.vehicle.service;
 
 import com.godfrey.vehicle.dto.VehicleCreateDTO;
 import com.godfrey.vehicle.dto.VehiclePatchDTO;
-import com.godfrey.vehicle.model.Vehicle;
+import com.godfrey.vehicle.dto.VehicleResponseDTO;
+import com.godfrey.vehicle.dto.VehicleUpdateDTO;
 
 import java.util.List;
 
 public interface IVehicleService {
 
     // Create
-    String createVehicle(VehicleCreateDTO dto);
+    VehicleResponseDTO createVehicle(VehicleCreateDTO dto);
 
     // Full update (PUT)
-    String updateVehicle(Long id, Vehicle vehicle);
+    VehicleResponseDTO updateVehicle(Long id, VehicleUpdateDTO dto);
 
     // Partial update (PATCH)
-    String partialUpdateVehicle(Long id, VehiclePatchDTO patch);
+    VehicleResponseDTO partialUpdateVehicle(Long id, VehiclePatchDTO dto);
 
     // Read
-    Vehicle fetchVehicleById(Long id);
-    List<Vehicle> fetchAllVehicles();
+    VehicleResponseDTO fetchVehicleById(Long id);
+
+    List<VehicleResponseDTO> fetchAllVehicles();
 
     // Delete
-    String deleteVehicleById(Long id);
+    void deleteVehicleById(Long id);
 }

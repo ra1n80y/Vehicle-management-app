@@ -1,5 +1,6 @@
 package com.godfrey.vehicle.model;
 
+import com.godfrey.vehicle.dto.VehicleCreateDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -41,6 +42,10 @@ public class Vehicle {
         this.model = model;
         this.type = type;
         this.year = year;
+    }
+
+    public Vehicle (VehicleCreateDTO dto) {
+        System.out.println ("Vehicle: "+dto);
     }
 
     public void setId(Long id) { this.id = id; }

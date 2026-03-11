@@ -2,11 +2,16 @@ package com.godfrey.vehicle.service;
 
 import com.godfrey.vehicle.dto.VehicleCreateDTO;
 import com.godfrey.vehicle.dto.VehiclePatchDTO;
+import com.godfrey.vehicle.dto.VehicleResponseDTO;
+import com.godfrey.vehicle.dto.VehicleUpdateDTO;
+import com.godfrey.vehicle.mapper.VehicleMapper;
 import com.godfrey.vehicle.model.Vehicle;
 import com.godfrey.vehicle.repository.VehicleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -15,67 +20,79 @@ import java.util.Optional;
 @Service
 public class VehicleService implements IVehicleService {
 
+    private final VehicleRepository repo;
+    private final VehicleMapper mapper;
+
     @Autowired
-    private VehicleRepository repo;
-
-    @Override
-    public String createVehicle(VehicleCreateDTO dto) {
-        Vehicle vehicle = new Vehicle();
-        vehicle.setName(dto.getName());
-        vehicle.setModel(dto.getModel());
-        vehicle.setType(dto.getType());
-        vehicle.setYear(dto.getYear());
-        repo.save(vehicle);
-        return "Vehicle registered";
+    public VehicleService(VehicleRepository repo, VehicleMapper mapper) {
+        this.repo = repo;
+        this.mapper = mapper;
     }
 
     @Override
-    public String updateVehicle(Long id, Vehicle vehicle) {
-        Optional<Vehicle> optional = repo.findById(id);
-        if (optional.isPresent()) {
-            vehicle.setId(id);
-            repo.save(vehicle);
-            return "Vehicle " + id + " updated";
-        } else {
-            return id + " Not Found";
-        }
+    public VehicleResponseDTO createVehicle(VehicleCreateDTO dto) {
+
+        Vehicle vehicle = mapper.toEntity(dto);
+
+        Vehicle saved = repo.save(vehicle);
+
+        return mapper.toResponseDTO(saved);
     }
 
     @Override
-    public String partialUpdateVehicle(Long id, VehiclePatchDTO patch) {
-        Optional<Vehicle> optional = repo.findById(id);
-        if (optional.isEmpty()) {
-            return "Not Found";
-        }
+    public VehicleResponseDTO updateVehicle(Long id, VehicleUpdateDTO dto) {
 
-        Vehicle vehicle = optional.get();
+        Vehicle vehicle = repo.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (patch.getName() != null) vehicle.setName(patch.getName());
-        if (patch.getModel() != null) vehicle.setModel(patch.getModel());
-        if (patch.getType() != null) vehicle.setType(patch.getType());
-        if (patch.getYear() != null) vehicle.setYear(patch.getYear());
+        mapper.updateFromDTO(dto, vehicle);
 
-        repo.save(vehicle);
-        return "Vehicle: "+id+" Updated";
+        Vehicle updated = repo.save(vehicle);
+
+        return mapper.toResponseDTO(updated);
     }
 
     @Override
-    public Vehicle fetchVehicleById(Long id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new NoSuchElementException ("Vehicle not found with id: " + id));
+    public VehicleResponseDTO partialUpdateVehicle(Long id, VehiclePatchDTO patch) {
+
+        Vehicle vehicle = repo.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        mapper.patchFromDTO(patch, vehicle);
+
+        Vehicle saved = repo.save(vehicle);
+
+        return mapper.toResponseDTO(saved);
     }
 
     @Override
-    public List<Vehicle> fetchAllVehicles() {
-        return repo.findAll();
+    public VehicleResponseDTO fetchVehicleById(Long id) {
+
+        Vehicle vehicle = repo.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return mapper.toResponseDTO(vehicle);
     }
 
     @Override
-    public String deleteVehicleById(Long id) {
+    public List<VehicleResponseDTO> fetchAllVehicles() {
+
+        return repo.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public void deleteVehicleById(Long id) {
+
         if (!repo.existsById(id)) {
-            return "Not Found";
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+
         repo.deleteById(id);
-        return "Deleted";
     }
 }
