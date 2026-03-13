@@ -1,8 +1,9 @@
+import Button from "react-bootstrap/esm/Button";
 import type { Vehicle } from "../Types/Vehicle";
 
 type Props = {
   vehicle: Vehicle;
-  onDelete: (id: number) => void;
+  onDelete: (vehicle: Vehicle) => void;
   onEdit: (vehicle: Vehicle) => void;
 };
 
@@ -16,19 +17,18 @@ export default function VehicleRow({ vehicle, onDelete, onEdit }: Props) {
       <td>{vehicle.year}</td>
 
       <td>
-        <button
-          className="btn btn-primary btn-sm me-2"
+        <Button
+          style={{ marginRight: "5px" }}
+          variant="warning"
+          size="sm"
           onClick={() => onEdit(vehicle)}
         >
           Edit
-        </button>
+        </Button>
 
-        <button
-          className="btn btn-danger btn-sm"
-          onClick={() => onDelete(vehicle.id)}
-        >
+        <Button variant="danger" size="sm" onClick={() => onDelete(vehicle)}>
           Delete
-        </button>
+        </Button>
       </td>
     </tr>
   );

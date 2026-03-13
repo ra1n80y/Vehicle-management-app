@@ -3,7 +3,7 @@ import VehicleRow from "./VehicleRow";
 
 type Props = {
   vehicles: Vehicle[];
-  onDelete: (id: number) => void;
+  onDelete: (vehicle: Vehicle) => void;
   onEdit: (vehicle: Vehicle) => void;
 };
 

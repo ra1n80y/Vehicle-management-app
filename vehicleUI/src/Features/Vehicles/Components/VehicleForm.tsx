@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { Vehicle } from "../Types/Vehicle";
 
 type Props = {
-  onCreate: (vehicle: Omit<Vehicle, "id">) => void;
-  onUpdate: (vehicle: Vehicle) => void;
+  onCreate: (vehicle: Omit<Vehicle, "id">) => Promise<void>;
+  onUpdate: (id: number, vehicle: Vehicle) => Promise<void>;
   editingVehicle: Vehicle | null;
   cancelEdit: () => void;
 };
@@ -18,6 +18,8 @@ export default function VehicleForm({
   const [model, setModel] = useState("");
   const [type, setType] = useState("");
   const [year, setYear] = useState("");
+  const [loading, setLoading] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editingVehicle) {
@@ -25,33 +27,45 @@ export default function VehicleForm({
       setModel(editingVehicle.model);
       setType(editingVehicle.type);
       setYear(String(editingVehicle.year));
+    } else {
+      setName("");
+      setModel("");
+      setType("");
+      setYear("");
     }
+
+    nameInputRef.current?.focus();
   }, [editingVehicle]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    if (editingVehicle) {
-      onUpdate({
-        id: editingVehicle.id,
-        name,
-        model,
-        type,
-        year: Number(year),
-      });
-    } else {
-      onCreate({
-        name,
-        model,
-        type,
-        year: Number(year),
-      });
+    try {
+      if (editingVehicle) {
+        await onUpdate(editingVehicle.id, {
+          id: editingVehicle.id,
+          name,
+          model,
+          type,
+          year: Number(year),
+        });
+      } else {
+        await onCreate({
+          name,
+          model,
+          type,
+          year: Number(year),
+        });
+      }
+
+      setName("");
+      setModel("");
+      setType("");
+      setYear("");
+    } finally {
+      setLoading(false);
     }
-
-    setName("");
-    setModel("");
-    setType("");
-    setYear("");
   };
 
   return (
@@ -63,6 +77,7 @@ export default function VehicleForm({
             placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            ref={nameInputRef}
           />
         </div>
 
@@ -95,8 +110,14 @@ export default function VehicleForm({
         </div>
 
         <div className="col-auto">
-          <button className="btn btn-success">
-            {editingVehicle ? "Update" : "Add"}
+          <button type="submit" className="btn btn-success" disabled={loading}>
+            {loading
+              ? editingVehicle
+                ? "Updating..."
+                : "Adding..."
+              : editingVehicle
+                ? "Update"
+                : "Add"}
           </button>
 
           {editingVehicle && (
@@ -104,6 +125,7 @@ export default function VehicleForm({
               type="button"
               className="btn btn-secondary ms-2"
               onClick={cancelEdit}
+              disabled={loading} // prevent cancel mid-submit
             >
               Cancel
             </button>
