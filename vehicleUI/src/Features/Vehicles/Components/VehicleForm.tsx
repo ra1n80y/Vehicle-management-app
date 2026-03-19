@@ -1,4 +1,5 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import type { Vehicle } from "../Types/Vehicle";
 
 type Props = {
@@ -8,109 +9,136 @@ type Props = {
   cancelEdit: () => void;
 };
 
+type FormData = {
+  name: string;
+  model: string;
+  type: string;
+  year: number;
+};
+
 export default function VehicleForm({
   onCreate,
   onUpdate,
   editingVehicle,
   cancelEdit,
 }: Props) {
-  const [name, setName] = useState("");
-  const [model, setModel] = useState("");
-  const [type, setType] = useState("");
-  const [year, setYear] = useState("");
   const [loading, setLoading] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isValid },
+  } = useForm<FormData>({
+    mode: "onChange",
+  });
+
   useEffect(() => {
     if (editingVehicle) {
-      setName(editingVehicle.name);
-      setModel(editingVehicle.model);
-      setType(editingVehicle.type);
-      setYear(String(editingVehicle.year));
+      reset({
+        name: editingVehicle.name,
+        model: editingVehicle.model,
+        type: editingVehicle.type,
+        year: editingVehicle.year,
+      });
     } else {
-      setName("");
-      setModel("");
-      setType("");
-      setYear("");
+      reset({
+        name: "",
+        model: "",
+        type: "",
+        year: undefined,
+      });
     }
 
     nameInputRef.current?.focus();
-  }, [editingVehicle]);
+  }, [editingVehicle, reset]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormData) => {
     setLoading(true);
 
     try {
       if (editingVehicle) {
         await onUpdate(editingVehicle.id, {
           id: editingVehicle.id,
-          name,
-          model,
-          type,
-          year: Number(year),
+          ...data,
         });
       } else {
-        await onCreate({
-          name,
-          model,
-          type,
-          year: Number(year),
-        });
+        await onCreate(data);
       }
 
-      setName("");
-      setModel("");
-      setType("");
-      setYear("");
+      reset();
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form className="mb-4" onSubmit={handleSubmit}>
+    <form className="mb-4" onSubmit={handleSubmit(onSubmit)}>
       <div className="row g-2">
         <div className="col">
           <input
-            className="form-control"
+            className={`form-control ${errors.name ? "is-invalid" : ""}`}
             placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            ref={nameInputRef}
+            {...register("name", { required: "Name is required" })}
+            ref={(e) => {
+              register("name").ref(e);
+              nameInputRef.current = e;
+            }}
           />
+          {errors.name && (
+            <div className="invalid-feedback">{errors.name.message}</div>
+          )}
         </div>
 
         <div className="col">
           <input
-            className="form-control"
+            className={`form-control ${errors.model ? "is-invalid" : ""}`}
             placeholder="Model"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
+            {...register("model", { required: "Model is required" })}
           />
+          {errors.model && (
+            <div className="invalid-feedback">{errors.model.message}</div>
+          )}
         </div>
 
         <div className="col">
           <input
-            className="form-control"
+            className={`form-control ${errors.type ? "is-invalid" : ""}`}
             placeholder="Type"
-            value={type}
-            onChange={(e) => setType(e.target.value)}
+            {...register("type", { required: "Type is required" })}
           />
+          {errors.type && (
+            <div className="invalid-feedback">{errors.type.message}</div>
+          )}
         </div>
 
         <div className="col">
           <input
-            className="form-control"
             type="number"
+            className={`form-control ${errors.year ? "is-invalid" : ""}`}
             placeholder="Year"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
+            {...register("year", {
+              required: "Year is required",
+              valueAsNumber: true,
+              min: { value: 1900, message: "Year must be after 1900" },
+              max: {
+                value: new Date().getFullYear(),
+                message: "Year cannot be in the future",
+              },
+            })}
           />
+          {errors.year && (
+            <div className="invalid-feedback">{errors.year.message}</div>
+          )}
         </div>
 
         <div className="col-auto">
-          <button type="submit" className="btn btn-success" disabled={loading}>
+          <button
+            type="submit"
+            className="btn btn-success"
+            disabled={!isValid || loading}
+          >
             {loading
               ? editingVehicle
                 ? "Updating..."
@@ -125,7 +153,7 @@ export default function VehicleForm({
               type="button"
               className="btn btn-secondary ms-2"
               onClick={cancelEdit}
-              disabled={loading} // prevent cancel mid-submit
+              disabled={loading}
             >
               Cancel
             </button>

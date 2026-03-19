@@ -1,7 +1,13 @@
-import VehiclesPage from "../Features/Vehicles/VehiclesPage";
+import { RouterProvider } from "react-router-dom";
+import { AuthProvider } from "../Features/Auth/Context/AuthContext";
+import { router } from "./router";
 
 function App() {
-  return <VehiclesPage />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App;

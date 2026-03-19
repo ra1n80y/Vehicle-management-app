@@ -1,48 +1,31 @@
+import { apiClient } from "../../../Shared/Services/apiClient";
 import type { Vehicle } from "../Types/Vehicle";
 
-const API_URL = "http://localhost:8080/api/vehicles";
-
-async function handleResponse<T>(res: Response): Promise<T> {
-    if (!res.ok) {
-        throw new Error(`HTTP error: ${res.status}`);
-    }
-    return res.json();
-}
+const VEHICLES_ENDPOINT = "/api/vehicles";
 
 export const getVehicles = async (): Promise<Vehicle[]> => {
-    const res = await fetch(API_URL);
-    return handleResponse<Vehicle[]>(res);
+  return apiClient.get<Vehicle[]>(VEHICLES_ENDPOINT);
 };
 
 export const postVehicle = async (
-    vehicle: Omit<Vehicle, "id">
+  vehicle: Omit<Vehicle, "id">
 ): Promise<Vehicle> => {
-    const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(vehicle),
-    });
-
-    return handleResponse<Vehicle>(res);
+  return apiClient.post<Vehicle, Omit<Vehicle, "id">>(
+    VEHICLES_ENDPOINT,
+    vehicle
+  );
 };
 
-export const putVehicle = async (
-    id: number,
-    vehicle: Vehicle
-): Promise<void> => {
-    const res = await fetch(`${API_URL}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(vehicle),
-    });
-
-    if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+export const updateVehicle = async (
+  id: number,
+  vehicle: Omit<Vehicle, "id">
+): Promise<Vehicle> => {
+  return apiClient.put<Vehicle, Omit<Vehicle, "id">>(
+    `${VEHICLES_ENDPOINT}/${id}`,
+    vehicle
+  );
 };
 
 export const deleteVehicle = async (id: number): Promise<void> => {
-    const res = await fetch(`${API_URL}/${id}`, {
-        method: "DELETE",
-    });
-
-    if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+  return apiClient.delete<void>(`${VEHICLES_ENDPOINT}/${id}`);
 };
