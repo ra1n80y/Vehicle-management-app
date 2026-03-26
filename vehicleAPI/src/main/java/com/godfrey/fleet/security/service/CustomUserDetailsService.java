@@ -1,10 +1,17 @@
 package com.godfrey.fleet.security.service;
 
-import com.godfrey.fleet.repository.UserRepository;
-import com.godfrey.fleet.model.User;
+import com.godfrey.fleet.role.Permission;
+import com.godfrey.fleet.role.Role;
+import com.godfrey.fleet.user.User;
+import com.godfrey.fleet.user.UserRepository;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -17,19 +24,27 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameWithRolesAndPermissions(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .authorities(
-                        user.getRoles().stream()
-                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
-                                .toList()
-                )
-                .disabled(!user.isActive())
-                .build();
+        if (!user.isActive()) {
+            throw new DisabledException("User account is disabled");
+        }
+
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        for (Role role : user.getRoles()) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+
+            for (Permission permission : role.getPermissions()) {
+                authorities.add(new SimpleGrantedAuthority(permission.getName()));
+            }
+        }
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                authorities
+        );
     }
 }

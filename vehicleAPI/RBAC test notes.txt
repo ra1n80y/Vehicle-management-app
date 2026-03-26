@@ -1,0 +1,69 @@
+*for all 500s, org.springframework.security.authorization.AuthorizationDeniedException is being thrown atleast [from IDE console output]*
+**UPDATE** 500 fallbacks are now mapped to their resp exceptions
+
+AUTH CASES
+valid login: 200 OK = check
+wrong password: 401 Unauthorized = returns 500 instead!
+wrong user: 401 Unauthorized = returns 500!
+no token: 401 Unauthorized = check
+invalid token: 401 Unauthorized = check
+============================================================================================
+
+auditor.readonly--
+valid login: 200 OK = check
+GET: 200 OK = check
+POST: 500 Server Error instead of 403 forbidden
+PUT: 500 inst of 403
+DELETE: 500 as well inst of 403
+=====================================================================================================
+
+vehicle.clerk--
+valid login: 200 OK = check
+GET: 200 OK = check
+POST: 201 CREATED = check
+PUT: 500 inst of 403
+DELETE: 500 inst of 403 
+=====================================================================================================
+
+fleet.manager--
+valid login: 200 OK = check
+GET: 200 OK = check
+POST: 201 CREATED = check
+PUT: 200 OK = check
+DELETE: 500 > 403
+================================================================================================
+
+admin.ops--
+valid login: 200 OK = check
+GET: 200 OK = check
+POST: 201 CREATED = check
+PUT: 200 OK = check
+DELETE: 204 NO CONTENT = check
+=======================================================================================================
+
+superadmin--
+valid login: 200 OK = check
+GET: 200 OK = check
+POST: 201 CREATED = check
+PUT: 200 OK = check
+DELETE: 204 NO CONTENT = check
+=============================================================================================================
+
+Exception handling checklist--
+**********************************
+
+Invalid DTO on create: 400 BAD REQUEST = check
+Invalid DTO on update: 400 BAD REQUEST = check
+Malformed JSON: 400 BAD REQUEST = check
+Update missing vehicle: 404 NOT FOUND = check
+Delete missing vehicle: 404 NOT FOUND = check
+
+correction checklist--
+**************************
+wrong password: now returns 401
+wrong user: 401 returns
+auditor tries POST: 403 successfully returned
+auditor tries PUT: 403 successfully returned
+auditor tries DELETE: 403 successfully returned
+clerk tries PUT: 403 successfully returned
+manager tries DELETE: 403 successfully returned
