@@ -143,22 +143,3 @@ The system is now stable and ready for:
 * Audit trail (repudiation)
 * Ownership-based access control (OwnBC)
 * Dockerization and cloud deployment
-
----
-
-## Optional refinement (small but valuable)
-
-If you want to push it one level higher, you can add:
-
-```markdown
-## 🔍 Next Steps
-
-- Implement audit logging (who did what, when)
-- Introduce ownership-based access control
-- Dockerize backend and frontend
-- Deploy to AWS / Azure
-```
-
----
-
-This version positions your project not as “a CRUD app” but as **a secured backend system with verified access control**, which is a materially stronger signal to anyone reviewing your portfolio.
