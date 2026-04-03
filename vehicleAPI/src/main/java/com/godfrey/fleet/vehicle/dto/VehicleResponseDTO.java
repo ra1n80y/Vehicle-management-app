@@ -22,9 +22,11 @@ public class VehicleResponseDTO {
     @Min(value = 1900, message = "Year must be >= 1900")
     private Integer year;
 
+    private Long ownerId;
+    private String ownerUsername;
+
     public VehicleResponseDTO() {}
 
-    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -39,4 +41,10 @@ public class VehicleResponseDTO {
 
     public Integer getYear() { return year; }
     public void setYear(Integer year) { this.year = year; }
+
+    public Long getOwnerId() { return ownerId; }
+    public void setOwnerId(Long ownerId) { this.ownerId = ownerId; }
+
+    public String getOwnerUsername() { return ownerUsername; }
+    public void setOwnerUsername(String ownerUsername) { this.ownerUsername = ownerUsername; }
 }

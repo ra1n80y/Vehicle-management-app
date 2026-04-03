@@ -11,4 +11,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
     @Query(value = "SELECT id, type FROM vehicles", nativeQuery = true)
     List<Object[]> findAllRawVehicleTypes();
+
+    List<Vehicle> findByOwnerUsername(String username);
+    List<Vehicle> findByOwnerId(Long ownerId);
 }

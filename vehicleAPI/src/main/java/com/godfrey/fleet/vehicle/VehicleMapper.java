@@ -15,19 +15,19 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 )
 public interface VehicleMapper {
 
-    // When creating a new Vehicle, ignore ID (DB generates it)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "owner", ignore = true)
     Vehicle fromCreateDTO(VehicleCreateDTO dto);
 
-    // When updating, ignore ID so it doesn't get overwritten
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "owner", ignore = true)
     void updateFromDTO(VehicleUpdateDTO dto, @MappingTarget Vehicle vehicle);
 
-    // PATCH: ignore ID and any other DB-managed fields (e.g., timestamps)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "owner", ignore = true)
     void patchFromDTO(VehiclePatchDTO dto, @MappingTarget Vehicle vehicle);
 
+    @Mapping(target = "ownerId", source = "owner.id")
+    @Mapping(target = "ownerUsername", source = "owner.username")
     VehicleResponseDTO toResponse(Vehicle vehicle);
-
-//    List<VehicleResponseDTO> toResponseDTOs(List<Vehicle> vehicles);
 }

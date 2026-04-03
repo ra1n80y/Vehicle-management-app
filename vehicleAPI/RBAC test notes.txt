@@ -1,5 +1,5 @@
 *for all 500s, org.springframework.security.authorization.AuthorizationDeniedException is being thrown atleast [from IDE console output]*
-**UPDATE** 500 fallbacks are now mapped to their resp exceptions
+**UPDATE** Code 500 fallbacks are now mapped to their codes/exceptions
 
 AUTH CASES
 valid login: 200 OK = check

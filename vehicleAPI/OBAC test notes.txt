@@ -1,0 +1,27 @@
+OwnBAC test notes
+******************************
+
+fleet manager: Bearer eyJhbGciOiJIUzI1NiJ9.eyJwZXJtaXNzaW9ucyI6WyJWRUhJQ0xFX0NSRUFURSIsIlZFSElDTEVfUkVBRCIsIlZFSElDTEVfVVBEQVRFIl0sInJvbGVzIjpbIk1BTkFHRVIiXSwic3ViIjoiZmxlZXQubWFuYWdlciIsImlhdCI6MTc3NTA1MTkyNSwiZXhwIjoxNzc1MDg3OTI1fQ.jIbFWSj4PlvikEDXlOzR6iYZdneu1mey5nhSTiVFxlc
+
+fleet manager2: Bearer eyJhbGciOiJIUzI1NiJ9.eyJwZXJtaXNzaW9ucyI6WyJWRUhJQ0xFX0NSRUFURSIsIlZFSElDTEVfUkVBRCIsIlZFSElDTEVfVVBEQVRFIl0sInJvbGVzIjpbIk1BTkFHRVIiXSwic3ViIjoiZmxlZXQubWFuYWdlcjIiLCJpYXQiOjE3NzUwMzc3MjYsImV4cCI6MTc3NTA3MzcyNn0.enTz8E4GBt0Qn1tN0sK7BhbnyZn_LSaqprcwWV5HMkI
+
+admin ops: Bearer eyJhbGciOiJIUzI1NiJ9.eyJwZXJtaXNzaW9ucyI6WyJWRUhJQ0xFX0NSRUFURSIsIlZFSElDTEVfREVMRVRFIiwiVkVISUNMRV9PV05FUlNISVBfT1ZFUlJJREUiLCJWRUhJQ0xFX1JFQUQiLCJWRUhJQ0xFX1VQREFURSJdLCJyb2xlcyI6WyJBRE1JTiJdLCJzdWIiOiJhZG1pbi5vcHMiLCJpYXQiOjE3NzUwMzc3ODAsImV4cCI6MTc3NTA3Mzc4MH0.clAQ0X5wCthRie0WlTwWKtEWShG6Z1DxxfShTFDVsJA
+
+superadmin: Bearer eyJhbGciOiJIUzI1NiJ9.eyJwZXJtaXNzaW9ucyI6WyJWRUhJQ0xFX0NSRUFURSIsIlZFSElDTEVfREVMRVRFIiwiVkVISUNMRV9PV05FUlNISVBfT1ZFUlJJREUiLCJWRUhJQ0xFX1JFQUQiLCJWRUhJQ0xFX1VQREFURSJdLCJyb2xlcyI6WyJTVVBFUkFETUlOIl0sInN1YiI6InN1cGVyYWRtaW4iLCJpYXQiOjE3NzUwMzc5NTUsImV4cCI6MTc3NTA3Mzk1NX0.A60oDbu3Jsfn2myLC9aTI77RNSgO85b7QgoSyAItYyQ
+
+
+test 1: pass--fleet.manager--200 OK
+test 2: pass--fleet.manager2--403 FORBIDDEN
+test 3: pass--fleet.manager2--200 OK
+test 4: pass--fleet.manager--403 FORBIDDEN
+
+test 5a: pass--200 OK--overriden
+test 5b: pass--200 OK--overriden
+
+test 6: pass--200 OK--overidden
+
+test 7a: pass--managers cant delete own resources, let alone others
+test 7b: pass--overrides occur successfully
+
+test 8a: pass-403FORBIDDEN--manager 2 cant edit manager 1's resource
+test 8b: *same as above*

@@ -2,9 +2,9 @@ package com.godfrey.fleet.common.config;
 
 import com.godfrey.fleet.role.Permission;
 import com.godfrey.fleet.role.Role;
-import com.godfrey.fleet.user.User;
 import com.godfrey.fleet.role.PermissionRepository;
 import com.godfrey.fleet.role.RoleRepository;
+import com.godfrey.fleet.user.User;
 import com.godfrey.fleet.user.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +16,7 @@ import java.util.Set;
 
 import static com.godfrey.fleet.security.Permissions.VEHICLE_CREATE;
 import static com.godfrey.fleet.security.Permissions.VEHICLE_DELETE;
+import static com.godfrey.fleet.security.Permissions.VEHICLE_OWNERSHIP_OVERRIDE;
 import static com.godfrey.fleet.security.Permissions.VEHICLE_READ;
 import static com.godfrey.fleet.security.Permissions.VEHICLE_UPDATE;
 
@@ -47,9 +48,21 @@ public class RbacSeeder implements CommandLineRunner {
         Permission create = createPermission(VEHICLE_CREATE, "Allows creating vehicles");
         Permission update = createPermission(VEHICLE_UPDATE, "Allows updating vehicles");
         Permission delete = createPermission(VEHICLE_DELETE, "Allows deleting vehicles");
+        Permission ownershipOverride = createPermission(
+                VEHICLE_OWNERSHIP_OVERRIDE,
+                "Allows overriding vehicle ownership checks"
+        );
 
-        Role superAdmin = createOrUpdateRole("SUPERADMIN", mutableSet(read, create, update, delete));
-        Role admin = createOrUpdateRole("ADMIN", mutableSet(read, create, update, delete));
+        Role superAdmin = createOrUpdateRole(
+                "SUPERADMIN",
+                mutableSet(read, create, update, delete, ownershipOverride)
+        );
+
+        Role admin = createOrUpdateRole(
+                "ADMIN",
+                mutableSet(read, create, update, delete, ownershipOverride)
+        );
+
         Role manager = createOrUpdateRole("MANAGER", mutableSet(read, create, update));
         Role clerk = createOrUpdateRole("CLERK", mutableSet(read, create));
         Role auditor = createOrUpdateRole("AUDITOR", mutableSet(read));
@@ -59,6 +72,7 @@ public class RbacSeeder implements CommandLineRunner {
         upsertUser("fleet.manager", "manager123", true, mutableSet(manager));
         upsertUser("vehicle.clerk", "clerk123", true, mutableSet(clerk));
         upsertUser("auditor.readonly", "audit123", true, mutableSet(auditor));
+        upsertUser("fleet.manager2", "manager123", true, mutableSet(manager));
     }
 
     private Permission createPermission(String name, String description) {
@@ -84,12 +98,7 @@ public class RbacSeeder implements CommandLineRunner {
                 });
     }
 
-    private void upsertUser(
-            String username,
-            String rawPassword,
-            boolean active,
-            Set<Role> roles
-    ) {
+    private void upsertUser(String username, String rawPassword, boolean active, Set<Role> roles) {
         User user = userRepository.findByUsername(username).orElseGet(User::new);
 
         user.setUsername(username);

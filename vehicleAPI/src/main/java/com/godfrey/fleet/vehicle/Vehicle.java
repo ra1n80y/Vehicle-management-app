@@ -1,5 +1,6 @@
 package com.godfrey.fleet.vehicle;
 
+import com.godfrey.fleet.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.time.Year;
@@ -33,6 +34,18 @@ public class Vehicle {
     @Max(Year.MAX_VALUE) // We will validate manually in setter
     @Column(name = "YEAR", nullable = false)
     private int year;
+
+    public User getOwner () {
+        return owner;
+    }
+
+    public void setOwner (User owner) {
+        this.owner = owner;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
 
     // Default constructor
     public Vehicle() {
