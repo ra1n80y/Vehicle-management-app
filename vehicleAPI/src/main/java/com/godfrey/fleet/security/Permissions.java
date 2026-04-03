@@ -7,6 +7,7 @@ public final class Permissions {
     public static final String VEHICLE_UPDATE = "VEHICLE_UPDATE";
     public static final String VEHICLE_DELETE = "VEHICLE_DELETE";
     public static final String VEHICLE_OWNERSHIP_OVERRIDE = "VEHICLE_OWNERSHIP_OVERRIDE";
+    public static final String AUDIT_READ = "AUDIT_READ";
 
     private Permissions() {
     }

@@ -14,11 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.godfrey.fleet.security.Permissions.VEHICLE_CREATE;
-import static com.godfrey.fleet.security.Permissions.VEHICLE_DELETE;
-import static com.godfrey.fleet.security.Permissions.VEHICLE_OWNERSHIP_OVERRIDE;
-import static com.godfrey.fleet.security.Permissions.VEHICLE_READ;
-import static com.godfrey.fleet.security.Permissions.VEHICLE_UPDATE;
+import static com.godfrey.fleet.security.Permissions.*;
 
 @Configuration
 public class RbacSeeder implements CommandLineRunner {
@@ -52,15 +48,16 @@ public class RbacSeeder implements CommandLineRunner {
                 VEHICLE_OWNERSHIP_OVERRIDE,
                 "Allows overriding vehicle ownership checks"
         );
+        Permission logRead = createPermission (AUDIT_READ, "Allows log reading");
 
         Role superAdmin = createOrUpdateRole(
                 "SUPERADMIN",
-                mutableSet(read, create, update, delete, ownershipOverride)
+                mutableSet(read, create, update, delete, ownershipOverride, logRead)
         );
 
         Role admin = createOrUpdateRole(
                 "ADMIN",
-                mutableSet(read, create, update, delete, ownershipOverride)
+                mutableSet(read, create, update, delete, ownershipOverride, logRead)
         );
 
         Role manager = createOrUpdateRole("MANAGER", mutableSet(read, create, update));

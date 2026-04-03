@@ -34,6 +34,18 @@ public class CurrentUserService {
                 .orElseThrow(() -> new IllegalStateException("Authenticated user not found: " + username));
     }
 
+    public String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication instanceof AnonymousAuthenticationToken) {
+            throw new IllegalStateException("No authenticated user found");
+        }
+
+        return authentication.getName();
+    }
+
     public boolean hasAnyRole(String... roleNames) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

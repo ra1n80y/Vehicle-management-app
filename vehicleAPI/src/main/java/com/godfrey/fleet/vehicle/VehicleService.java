@@ -1,5 +1,7 @@
 package com.godfrey.fleet.vehicle;
 
+import com.godfrey.fleet.audit.AuditAction;
+import com.godfrey.fleet.audit.AuditLogService;
 import com.godfrey.fleet.common.exception.ResourceNotFoundException;
 import com.godfrey.fleet.security.Permissions;
 import com.godfrey.fleet.security.service.CurrentUserService;
@@ -8,7 +10,6 @@ import com.godfrey.fleet.vehicle.dto.VehicleCreateDTO;
 import com.godfrey.fleet.vehicle.dto.VehiclePatchDTO;
 import com.godfrey.fleet.vehicle.dto.VehicleResponseDTO;
 import com.godfrey.fleet.vehicle.dto.VehicleUpdateDTO;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -20,15 +21,22 @@ import java.util.List;
 @Transactional
 public class VehicleService implements IVehicleService {
 
-    public VehicleService (VehicleRepository vehicleRepository, VehicleMapper vehicleMapper, CurrentUserService currentUserService) {
-        this.vehicleRepository = vehicleRepository;
-        this.vehicleMapper = vehicleMapper;
-        this.currentUserService = currentUserService;
-    }
-
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
     private final CurrentUserService currentUserService;
+    private final AuditLogService auditLogService;
+
+    public VehicleService(
+            VehicleRepository vehicleRepository,
+            VehicleMapper vehicleMapper,
+            CurrentUserService currentUserService,
+            AuditLogService auditLogService
+    ) {
+        this.vehicleRepository = vehicleRepository;
+        this.vehicleMapper = vehicleMapper;
+        this.currentUserService = currentUserService;
+        this.auditLogService = auditLogService;
+    }
 
     @Override
     @PreAuthorize("hasAuthority(T(com.godfrey.fleet.security.Permissions).VEHICLE_CREATE)")
@@ -39,6 +47,14 @@ public class VehicleService implements IVehicleService {
         vehicle.setOwner(currentUser);
 
         Vehicle savedVehicle = vehicleRepository.save(vehicle);
+
+        auditLogService.log(
+                AuditAction.CREATE,
+                "Vehicle",
+                savedVehicle.getId(),
+                currentUser.getUsername()
+        );
+
         return vehicleMapper.toResponse(savedVehicle);
     }
 
@@ -51,6 +67,14 @@ public class VehicleService implements IVehicleService {
         vehicleMapper.updateFromDTO(dto, existingVehicle);
 
         Vehicle savedVehicle = vehicleRepository.save(existingVehicle);
+
+        auditLogService.log(
+                AuditAction.UPDATE,
+                "Vehicle",
+                savedVehicle.getId(),
+                currentUserService.getCurrentUsername()
+        );
+
         return vehicleMapper.toResponse(savedVehicle);
     }
 
@@ -63,6 +87,14 @@ public class VehicleService implements IVehicleService {
         vehicleMapper.patchFromDTO(dto, existingVehicle);
 
         Vehicle savedVehicle = vehicleRepository.save(existingVehicle);
+
+        auditLogService.log(
+                AuditAction.PATCH,
+                "Vehicle",
+                savedVehicle.getId(),
+                currentUserService.getCurrentUsername()
+        );
+
         return vehicleMapper.toResponse(savedVehicle);
     }
 
@@ -72,7 +104,16 @@ public class VehicleService implements IVehicleService {
         Vehicle existingVehicle = findVehicleByIdOrThrow(id);
         validateOwnershipOrOverride(existingVehicle);
 
+        Long vehicleId = existingVehicle.getId();
+
         vehicleRepository.delete(existingVehicle);
+
+        auditLogService.log(
+                AuditAction.DELETE,
+                "Vehicle",
+                vehicleId,
+                currentUserService.getCurrentUsername()
+        );
     }
 
     private Vehicle findVehicleByIdOrThrow(Long id) {
