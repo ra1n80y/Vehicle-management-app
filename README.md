@@ -40,18 +40,19 @@ Superadmin	Full system access
 🧪 Security Validation
 --------------------------
 PBAC
-Role	GET	POST	PUT	DELETE
-Auditor	200	403	403	403
-Clerk	200	201	403	403
-Manager	200	201	200	403
-Admin	200	201	200	204
+----------------------
+Role	 |GET	POST PUT DELETE
+Auditor|200	403	 403 403
+Clerk	 |200	201	 403 403
+Manager|200	201  200 403
+Admin	 |200	201	 200 204
 
 OwnBC
-Scenario	Result
+Scenario	                  Result
 Owner modifies own resource	200
-Peer non-owner modifies	403
-Admin override	200
-Superadmin bypass	200
+Peer non-owner modifies	    403
+Admin override	            200
+Superadmin bypass	          200
 
 ✔ Ownership enforced on PUT/PATCH
 ✔ Override behavior validated
@@ -94,9 +95,12 @@ Correct HTTP semantics
 Clean backend architecture
 Deterministic security validation
 ********************************************
+*UPDATE*
+----------------
+Successful vehicle mutations are recorded in an append-only audit log capturing action, target resource, actor, and timestamp. Audit logs are accessible only to elevated roles and cannot be modified through the API
+**********************************************
 🚀 Next Steps
 ------------------------
-Audit logging
 Frontend catch-up
 Dockerization
 Cloud deployment
