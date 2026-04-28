@@ -26,6 +26,7 @@ type AuthProviderProps = {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [token, setTokenState] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const logout = useCallback((): void => {
     removeToken();
@@ -37,11 +38,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const storedToken = getToken();
 
     if (!storedToken) {
+      setIsInitializing(false);
       return;
     }
 
     if (isTokenExpired(storedToken)) {
       logout();
+      setIsInitializing(false);
       return;
     }
 
@@ -49,11 +52,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     if (!parsedUser) {
       logout();
+      setIsInitializing(false);
       return;
     }
 
     setTokenState(storedToken);
     setUser(parsedUser);
+    setIsInitializing(false);
   }, [logout]);
 
   useEffect(() => {
@@ -85,10 +90,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       token,
       user,
       isAuthenticated: !!token && !!user,
+      isInitializing,
       login,
       logout,
     }),
-    [token, user, logout],
+    [token, user, isInitializing, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

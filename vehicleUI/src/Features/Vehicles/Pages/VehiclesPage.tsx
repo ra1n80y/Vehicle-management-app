@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
 import type { Vehicle } from "../Types/Vehicle";
-import {
-  getVehicles,
-  deleteVehicle,
-  updateVehicle,
-  postVehicle,
-} from "../Services/VehicleService";
-
+import { VehicleService } from "../Services/VehicleService";
 import VehicleTable from "../Components/VehicleTable";
 import Button from "react-bootstrap/Button";
 import ToastNotification from "../../../Shared/Components/ToastNotification";
 import useToast from "../../../Shared/Hooks/useToast";
 import CommonModal from "../../../Shared/Components/CommonModal";
 import VehicleForm from "../Components/VehicleForm";
+import { useAuth } from "../../Auth/Hooks/useAuth";
+import { hasPermission } from "../../Auth/Utils/permissions";
 
 export default function VehiclesPage() {
+  const { user } = useAuth();
+
+  const canCreate = hasPermission(user, "VEHICLE_CREATE");
+  const canUpdate = hasPermission(user, "VEHICLE_UPDATE");
+  const canDelete = hasPermission(user, "VEHICLE_DELETE");
+
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,7 +31,7 @@ export default function VehiclesPage() {
   const loadVehicles = async () => {
     try {
       setIsLoading(true);
-      const data = await getVehicles();
+      const data = await VehicleService.getAll();
       setVehicles(data);
     } catch (error) {
       const errorMessage =
@@ -46,7 +48,7 @@ export default function VehiclesPage() {
 
   const handleCreate = async (vehicle: Omit<Vehicle, "id">) => {
     try {
-      const createdVehicle = await postVehicle(vehicle);
+      const createdVehicle = await VehicleService.create(vehicle);
       setVehicles((prev) => [...prev, createdVehicle]);
       setShowModal(false);
       setSelectedVehicle(null);
@@ -65,9 +67,8 @@ export default function VehiclesPage() {
 
   const confirmDelete = async () => {
     if (!vehicleToDelete) return;
-
     try {
-      await deleteVehicle(vehicleToDelete.id);
+      await VehicleService.delete(vehicleToDelete.id);
       setVehicles((prev) => prev.filter((v) => v.id !== vehicleToDelete.id));
       triggerToast("Vehicle deleted successfully");
       setVehicleToDelete(null);
@@ -86,17 +87,15 @@ export default function VehiclesPage() {
 
   const handleUpdate = async (vehicle: Vehicle) => {
     try {
-      const updated = await updateVehicle(vehicle.id, {
+      const updated = await VehicleService.update(vehicle.id, {
         name: vehicle.name,
         model: vehicle.model,
         type: vehicle.type,
         year: vehicle.year,
       });
-
       setVehicles((prev) =>
         prev.map((v) => (v.id === updated.id ? updated : v)),
       );
-
       setShowModal(false);
       setSelectedVehicle(null);
       triggerToast("Vehicle updated successfully");
@@ -116,24 +115,26 @@ export default function VehiclesPage() {
     <div className="container mt-4">
       <h1 className="mb-3">Vehicles</h1>
 
-      <Button
-        className="mb-2"
-        variant="primary"
-        onClick={() => {
-          setSelectedVehicle(null);
-          setShowModal(true);
-        }}
-      >
-        Add Vehicle
-      </Button>
+      {canCreate && (
+        <Button
+          className="mb-2"
+          variant="primary"
+          onClick={() => {
+            setSelectedVehicle(null);
+            setShowModal(true);
+          }}
+        >
+          Add Vehicle
+        </Button>
+      )}
 
       {isLoading ? (
         <p>Loading vehicles...</p>
       ) : (
         <VehicleTable
           vehicles={vehicles}
-          onDelete={handleDeleteClick}
-          onEdit={handleEdit}
+          onDelete={canDelete ? handleDeleteClick : undefined}
+          onEdit={canUpdate ? handleEdit : undefined}
         />
       )}
 
@@ -161,7 +162,6 @@ export default function VehiclesPage() {
           Are you sure you want to delete{" "}
           <strong>{vehicleToDelete?.name}</strong>?
         </p>
-
         <div className="d-flex justify-content-end gap-2">
           <button
             className="btn btn-secondary"
@@ -169,7 +169,6 @@ export default function VehiclesPage() {
           >
             Cancel
           </button>
-
           <button className="btn btn-danger" onClick={confirmDelete}>
             Delete
           </button>

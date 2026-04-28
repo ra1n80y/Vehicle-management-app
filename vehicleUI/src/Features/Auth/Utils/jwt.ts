@@ -40,6 +40,7 @@ export const getUserFromToken = (token: string): AuthUser | null => {
 
   return {
     username: payload.sub,
-    roles: payload.roles ?? [],
+    roles: Array.isArray(payload.roles) ? payload.roles : [],
+    permissions: Array.isArray(payload.permissions) ? payload.permissions : [],
   };
 };

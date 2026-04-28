@@ -12,10 +12,9 @@ function ToastNotification({ message, show, onClose }: ToastProps) {
       const timer = setTimeout(() => {
         onClose();
       }, 3000);
-
       return () => clearTimeout(timer);
     }
-  }, [show]);
+  }, [show, onClose]);
 
   if (!show) return null;
 

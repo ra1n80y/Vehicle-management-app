@@ -12,7 +12,6 @@ async function request<T>(
   options: RequestOptions = {},
 ): Promise<T> {
   const { auth = true, headers, ...rest } = options;
-
   const token = getToken();
   const mergedHeaders = new Headers(headers);
 
@@ -34,12 +33,14 @@ async function request<T>(
     throw new Error("Your session has expired. Please log in again.");
   }
 
+  if (response.status === 403) {
+    throw new Error("You do not have permission to perform this action.");
+  }
+
   if (!response.ok) {
     let errorMessage = `HTTP error: ${response.status}`;
-
     try {
       const errorBody = await response.json();
-
       if (errorBody?.message) {
         errorMessage = errorBody.message;
       } else if (errorBody?.error) {
@@ -48,7 +49,6 @@ async function request<T>(
     } catch {
       // keep fallback error message
     }
-
     throw new Error(errorMessage);
   }
 
@@ -73,6 +73,13 @@ export const apiClient = {
   put: <TResponse, TBody>(endpoint: string, body: TBody, auth = true) =>
     request<TResponse>(endpoint, {
       method: "PUT",
+      auth,
+      body: JSON.stringify(body),
+    }),
+
+  patch: <TResponse, TBody>(endpoint: string, body: TBody, auth = true) =>
+    request<TResponse>(endpoint, {
+      method: "PATCH",
       auth,
       body: JSON.stringify(body),
     }),

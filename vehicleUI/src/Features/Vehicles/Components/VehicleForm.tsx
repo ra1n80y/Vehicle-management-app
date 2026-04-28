@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { Vehicle } from "../Types/Vehicle";
 
@@ -23,12 +23,12 @@ export default function VehicleForm({
   cancelEdit,
 }: Props) {
   const [loading, setLoading] = useState(false);
-  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
     reset,
+    setFocus,
     formState: { errors, isValid },
   } = useForm<FormData>({
     mode: "onChange",
@@ -51,12 +51,12 @@ export default function VehicleForm({
       });
     }
 
-    nameInputRef.current?.focus();
-  }, [editingVehicle, reset]);
+    // Focus the name input after reset
+    setFocus("name");
+  }, [editingVehicle, reset, setFocus]);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
-
     try {
       if (editingVehicle) {
         await onUpdate(editingVehicle.id, {
@@ -66,7 +66,6 @@ export default function VehicleForm({
       } else {
         await onCreate(data);
       }
-
       reset();
     } finally {
       setLoading(false);
@@ -81,10 +80,6 @@ export default function VehicleForm({
             className={`form-control ${errors.name ? "is-invalid" : ""}`}
             placeholder="Name"
             {...register("name", { required: "Name is required" })}
-            ref={(e) => {
-              register("name").ref(e);
-              nameInputRef.current = e;
-            }}
           />
           {errors.name && (
             <div className="invalid-feedback">{errors.name.message}</div>

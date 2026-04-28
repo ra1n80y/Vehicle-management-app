@@ -1,0 +1,35 @@
+.audit-log-table-wrapper {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow-x: auto;
+}
+
+.audit-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.audit-log-table th,
+.audit-log-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.audit-log-table th {
+  background-color: #f9fafb;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.audit-log-table td {
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.audit-log-table tbody tr:hover {
+  background-color: #f9fafb;
+}

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../Hooks/useAuth";
+import "./LoginPage.css";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -35,11 +36,11 @@ const LoginPage = () => {
   }
 
   return (
-    <div style={{ maxWidth: "400px", margin: "4rem auto" }}>
+    <div className="login-container">
       <h1>Login</h1>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "1rem" }}>
+        <div className="form-group">
           <label htmlFor="username">Username</label>
           <input
             id="username"
@@ -47,11 +48,10 @@ const LoginPage = () => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            style={{ display: "block", width: "100%" }}
           />
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
+        <div className="form-group">
           <label htmlFor="password">Password</label>
           <input
             id="password"
@@ -59,13 +59,12 @@ const LoginPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ display: "block", width: "100%" }}
           />
         </div>
 
-        {error && <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>}
+        {error && <p className="error-message">{error}</p>}
 
-        <button type="submit" disabled={isSubmitting}>
+        <button className="login-button" type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Logging in..." : "Login"}
         </button>
       </form>

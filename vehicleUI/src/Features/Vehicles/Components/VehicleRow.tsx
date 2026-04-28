@@ -1,10 +1,11 @@
+// src/Features/Vehicles/Components/VehicleRow.tsx
 import Button from "react-bootstrap/esm/Button";
 import type { Vehicle } from "../Types/Vehicle";
 
 type Props = {
   vehicle: Vehicle;
-  onDelete: (vehicle: Vehicle) => void;
-  onEdit: (vehicle: Vehicle) => void;
+  onDelete?: (vehicle: Vehicle) => void; // Optional
+  onEdit?: (vehicle: Vehicle) => void; // Optional
 };
 
 export default function VehicleRow({ vehicle, onDelete, onEdit }: Props) {
@@ -17,18 +18,22 @@ export default function VehicleRow({ vehicle, onDelete, onEdit }: Props) {
       <td>{vehicle.year}</td>
 
       <td>
-        <Button
-          style={{ marginRight: "5px" }}
-          variant="warning"
-          size="sm"
-          onClick={() => onEdit(vehicle)}
-        >
-          Edit
-        </Button>
+        {onEdit && (
+          <Button
+            style={{ marginRight: "5px" }}
+            variant="warning"
+            size="sm"
+            onClick={() => onEdit(vehicle)}
+          >
+            Edit
+          </Button>
+        )}
 
-        <Button variant="danger" size="sm" onClick={() => onDelete(vehicle)}>
-          Delete
-        </Button>
+        {onDelete && (
+          <Button variant="danger" size="sm" onClick={() => onDelete(vehicle)}>
+            Delete
+          </Button>
+        )}
       </td>
     </tr>
   );

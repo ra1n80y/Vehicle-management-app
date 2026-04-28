@@ -1,10 +1,11 @@
+// src/Features/Vehicles/Components/VehicleTable.tsx
 import type { Vehicle } from "../Types/Vehicle";
 import VehicleRow from "./VehicleRow";
 
 type Props = {
   vehicles: Vehicle[];
-  onDelete: (vehicle: Vehicle) => void;
-  onEdit: (vehicle: Vehicle) => void;
+  onDelete?: (vehicle: Vehicle) => void; // Made optional
+  onEdit?: (vehicle: Vehicle) => void; // Made optional
 };
 
 export default function VehicleTable({ vehicles, onDelete, onEdit }: Props) {

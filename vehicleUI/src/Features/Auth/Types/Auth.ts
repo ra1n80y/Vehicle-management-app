@@ -8,21 +8,23 @@ export type LoginResponse = {
 };
 
 export type JwtPayload = {
-  sub: string;
-  exp: number;
-  iat?: number;
+  sub?: string;
+  exp?: number;
   roles?: string[];
+  permissions?: string[];
 };
 
 export type AuthUser = {
   username: string;
   roles: string[];
+  permissions: string[];
 };
 
 export type AuthContextType = {
   token: string | null;
   user: AuthUser | null;
   isAuthenticated: boolean;
+  isInitializing: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => void;
 };
