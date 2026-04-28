@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(DuplicateResourceException.class)                       // <-- NEW
+    @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateResource(
             DuplicateResourceException ex,
             HttpServletRequest request

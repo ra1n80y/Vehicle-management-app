@@ -11,7 +11,7 @@ public class UserCreateDTO {
     @NotBlank
     private String password;
 
-    private Set<String> roles; // Role names
+    private Set<String> roles;
 
     public UserCreateDTO() {}
 

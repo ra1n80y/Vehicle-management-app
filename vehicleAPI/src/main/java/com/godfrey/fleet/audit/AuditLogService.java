@@ -32,7 +32,7 @@ public class AuditLogService implements IAuditLogService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority(T(com.godfrey.fleet.security.Permissions).AUDIT_READ)")   // <-- moved here
+    @PreAuthorize("hasAuthority(T(com.godfrey.fleet.security.Permissions).AUDIT_READ)")
     @Transactional(readOnly = true)
     public List<AuditLogResponseDTO> listAuditLogs() {
         return auditLogRepository.findAllByOrderByPerformedAtDesc()
@@ -42,7 +42,7 @@ public class AuditLogService implements IAuditLogService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority(T(com.godfrey.fleet.security.Permissions).AUDIT_READ)")   // <-- moved here
+    @PreAuthorize("hasAuthority(T(com.godfrey.fleet.security.Permissions).AUDIT_READ)")
     @Transactional(readOnly = true)
     public AuditLogResponseDTO getAuditLog(Long id) {
         AuditLog auditLog = auditLogRepository.findById(id)

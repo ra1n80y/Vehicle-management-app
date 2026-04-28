@@ -6,7 +6,7 @@ public class UserUpdateDTO {
 
     private String username;
     private Set<String> roles;
-    private Boolean active;   // ADDED
+    private Boolean active;
 
     public UserUpdateDTO() {}
 

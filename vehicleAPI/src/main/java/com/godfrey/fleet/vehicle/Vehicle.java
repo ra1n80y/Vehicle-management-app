@@ -31,7 +31,7 @@ public class Vehicle {
     private VehicleType type;
 
     @Min(1900)
-    @Max(Year.MAX_VALUE) // We will validate manually in setter
+    @Max(Year.MAX_VALUE)
     @Column(name = "YEAR", nullable = false)
     private int year;
 
@@ -47,18 +47,16 @@ public class Vehicle {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    // Default constructor
     public Vehicle() {
         System.out.println("*Entity called*");
     }
 
-    // Full-args constructor
     public Vehicle(Long id, String name, String model, VehicleType type, int year) {
         this.id = id;
         this.name = name;
         this.model = model;
         this.type = type;
-        setYear(year); // Use setter to enforce max
+        setYear(year);
     }
 
     // Getters / Setters

@@ -7,7 +7,7 @@ public class UserPatchDTO {
     private String username;
     private String password;
     private Set<String> roles;
-    private Boolean active;   // ADDED
+    private Boolean active;
 
     public UserPatchDTO() {}
 
