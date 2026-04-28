@@ -1,106 +1,153 @@
-Vehicle Admin Dashboard – Portfolio Checkpoint
+# Vehicle Management System
 
-A production-style full-stack application with validated backend architecture, stateless authentication, and layered authorization (PBAC + OwnBC).
+A full‑stack portfolio application demonstrating production‑grade architecture, stateless authentication, layered authorization (PBAC + Ownership‑Based Control), and a modern React frontend.
 
-Core Functionality
------------------------
-Full CRUD for vehicle records via REST API
-MySQL persistence with JPA/Hibernate
-Frontend reflects real-time backend state
-***********************************************
-🔐 Security Model
-------------------------
-Authentication
-JWT-based (/api/auth/login)
-Stateless
-Authorization: Bearer <token>
+---
 
-Authorization (Layered)
-PBAC (Permissions)
-@PreAuthorize("hasAuthority('VEHICLE_UPDATE')")
-VEHICLE_READ
-VEHICLE_CREATE
-VEHICLE_UPDATE
-VEHICLE_DELETE
+## 🚀 Tech Stack
 
-OwnBC (Ownership)
-owner OR VEHICLE_OWNERSHIP_OVERRIDE
-Owner → resource owner
-Override → admin.ops, superadmin
-*****************************************
-👥 Roles
--------------
-Role	Capabilities
-Auditor	Read
-Clerk	Read + Create
-Manager	Read + Create + Update
-Admin	Full CRUD + Override
-Superadmin	Full system access
-****************************************
-🧪 Security Validation
---------------------------
-PBAC
-----------------------
-Role	 |GET	POST PUT DELETE
-Auditor|200	403	 403 403
-Clerk	 |200	201	 403 403
-Manager|200	201  200 403
-Admin	 |200	201	 200 204
+| Layer       | Technology                                           |
+|-------------|------------------------------------------------------|
+| Backend     | Spring Boot 3, Java 17, Spring Security, JPA/Hibernate |
+| Database    | MySQL                                                |
+| Auth        | JWT (stateless) with RBAC/PBAC                        |
+| Frontend    | React 18, TypeScript, Vite, React Bootstrap           |
+| Build Tool  | Maven                                                |
 
-OwnBC
-Scenario	                  Result
-Owner modifies own resource	200
-Peer non-owner modifies	    403
-Admin override	            200
-Superadmin bypass	          200
+---
 
-✔ Ownership enforced on PUT/PATCH
-✔ Override behavior validated
-✔ No authorization leaks or incorrect status codes
-***************************************************
-⚠️ Exception Handling
----------------------------------
-Scenario	Status
-Auth failure	401
-Access denied	403
-Validation	400
-Not found	404
-Server error	500
+## ✨ Features
 
-✔ Centralized via GlobalExceptionHandler
-✔ No incorrect 500 responses for security paths
-*********************************************
-🧱 Architecture
---------------------------
-Feature-based structure
-DTO + Mapper (MapStruct)
-Service layer handles business logic + authorization
-JWT filter for authentication
-Centralized exception handling
-********************************************
-🖥️ Frontend
------------------------
-React + TypeScript + Vite
-Modular structure
-Functional CRUD UI
-JWT-integrated API communication
-***************************************
-📌 Significance
----------------------------------
-This project demonstrates:
+- **Vehicle Management** – full CRUD with ownership enforcement
+- **User Management** – create, edit, patch, and delete system users; assign multiple roles
+- **Role Management** – define roles with granular permissions (CRUD for roles)
+- **Audit Logging** – append‑only log of successful mutations (create, update, patch, delete) visible to authorized roles; detail modal on row click
+- **Permission‑Aware UI** – sidebar links and action buttons are conditionally rendered based on JWT‑decoded permissions
+- **Global Error Handling** – consistent JSON error responses (400, 401, 403, 404, 409, 500)
+- **Input Validation** – server‑side with Jakarta Bean Validation, client‑side with React Hook Form & Bootstrap
 
-Stateless authentication (JWT)
-Layered authorization (PBAC + OwnBC)
-Correct HTTP semantics
-Clean backend architecture
-Deterministic security validation
-********************************************
-*UPDATE*
-----------------
-Successful vehicle mutations are recorded in an append-only audit log capturing action, target resource, actor, and timestamp. Audit logs are accessible only to elevated roles and cannot be modified through the API
-**********************************************
-🚀 Next Steps
-------------------------
-Frontend catch-up
-Dockerization
-Cloud deployment
+---
+
+## 🔐 Security Model
+
+### Authentication
+- JWT‑based stateless auth via `/api/auth/login`
+- Tokens contain username, roles, and permissions
+- Frontend stores token in `localStorage`; apiClient attaches `Authorization: Bearer <token>`
+
+### Authorization – Two‑Layer
+
+#### 1. Permission‑Based (PBAC)
+Method‑level security with `@PreAuthorize` using the `Permissions` constants:
+
+```
+VEHICLE_READ, VEHICLE_CREATE, VEHICLE_UPDATE, VEHICLE_DELETE
+VEHICLE_OWNERSHIP_OVERRIDE             
+AUDIT_READ
+USER_READ, USER_CREATE, USER_UPDATE, USER_DELETE
+ROLE_READ, ROLE_MANAGE
+```
+
+#### 2. Ownership‑Based Control (OwnBC)
+- Vehicles belong to an `owner` (User)
+- Only the owner (or users with `VEHICLE_OWNERSHIP_OVERRIDE`) can update or delete a vehicle
+- Service‑layer checks prevent unauthorized modifications
+
+---
+
+## 👥 Roles & Permissions Matrix
+
+| Role        | Permissions                                                         |
+|-------------|---------------------------------------------------------------------|
+| AUDITOR     | `VEHICLE_READ`, `USER_READ`, `AUDIT_READ`                           |
+| CLERK       | above + `VEHICLE_CREATE`                                            |
+| MANAGER     | above + `VEHICLE_UPDATE`, `USER_READ`                               |
+| ADMIN       | all of the above + `VEHICLE_DELETE`, `VEHICLE_OWNERSHIP_OVERRIDE`, `USER_CREATE`, `USER_UPDATE`, `USER_DELETE`, `ROLE_READ`, `ROLE_MANAGE` |
+| SUPERADMIN  | every permission in the system                                      |
+
+> Seeded users: `superadmin`, `admin.ops`, `fleet.manager`, `vehicle.clerk`, `auditor.readonly`, `fleet.manager2` (passwords are the same: `super123`, `admin123`, `manager123`, etc.)
+
+---
+
+## 🧪 Security Validation Highlights
+
+- **RBAC/PBAC** tested: lower roles receive `403 Forbidden` on restricted endpoints; higher roles succeed
+- **Ownership** enforced: non‑owner peer gets `403`; owner or admin with override succeeds
+- **Audit logs** are read‑only; no API endpoint can modify them
+- All exceptions mapped to correct HTTP status codes (no 500s for auth errors)
+- Global exception handler ensures consistent error responses
+
+---
+
+## 🗄️ API Endpoints
+
+| Method   | Endpoint              | Required Permission     | Description                     |
+|----------|-----------------------|-------------------------|----------------------------------|
+| POST     | `/api/auth/login`     | none                    | Authenticate & receive JWT      |
+| GET      | `/api/vehicles`       | `VEHICLE_READ`          | List all vehicles               |
+| POST     | `/api/vehicles`       | `VEHICLE_CREATE`        | Create a vehicle (auto‑own)     |
+| PUT      | `/api/vehicles/{id}`  | `VEHICLE_UPDATE` + own  | Update vehicle                  |
+| PATCH    | `/api/vehicles/{id}`  | `VEHICLE_UPDATE` + own  | Partially update vehicle        |
+| DELETE   | `/api/vehicles/{id}`  | `VEHICLE_DELETE` + own  | Delete vehicle                  |
+| GET      | `/api/users`          | `USER_READ`             | List all users                  |
+| POST     | `/api/users`          | `USER_CREATE`           | Create a new user               |
+| PUT      | `/api/users/{id}`     | `USER_UPDATE`           | Update user (roles, active)     |
+| PATCH    | `/api/users/{id}`     | `USER_UPDATE`           | Patch user                      |
+| DELETE   | `/api/users/{id}`     | `USER_DELETE`           | Delete user                     |
+| GET      | `/api/roles`          | `ROLE_READ`             | List all roles                  |
+| POST     | `/api/roles`          | `ROLE_MANAGE`           | Create a new role               |
+| PUT      | `/api/roles/{id}`     | `ROLE_MANAGE`           | Update role                     |
+| PATCH    | `/api/roles/{id}`     | `ROLE_MANAGE`           | Patch role                      |
+| DELETE   | `/api/roles/{id}`     | `ROLE_MANAGE`           | Delete role                     |
+| GET      | `/api/audit-logs`     | `AUDIT_READ`            | List all audit logs             |
+
+---
+
+## 🖥️ Frontend Architecture
+
+- **Auth flow** – `AuthContext` + JWT decoding; protected routes via `ProtectedRoute`
+- **Permission‑aware UI** – `hasPermission(user, permission)` drives sidebar links and action button visibility
+- **Feature modules** – each domain (Vehicles, Users, Audit Logs, Dashboard) contains its own components, services, types, and CSS
+- **Shared components** – `CommonModal`, `ToastNotification`, `apiClient` (fetch wrapper with auto‑401 logout)
+- **UX polish** – toast notifications, loading/empty/error states, delete confirmations, detail modals for audit logs
+
+---
+
+## 📁 Project Structure (High‑Level)
+
+```
+backend/
+├── audit/        # Audit log entity, service, controller
+├── common/       # Exceptions, global handler, seeder
+├── role/         # Role + Permission entities, service, controller
+├── security/     # JWT filter, auth config, permissions constants
+├── user/         # User entity, service, controller
+├── vehicle/      # Vehicle entity, service, controller
+
+frontend/
+├── App/          # App entry, router
+├── Features/
+│   ├── Auth/     # Login page, context, JWT utils
+│   ├── Dashboard/# AppShell, sidebar, topbar, dashboard page
+│   ├── Vehicles/ # CRUD components, form, services
+│   ├── Users/    # User management, role assignment
+│   └── AuditLogs/# Read‑only log table + detail modal
+├── Shared/       # apiClient, toast, modal, date formatter
+└── Styles/       # global styles
+```
+
+---
+
+## 🔧 Recent Improvements (Full‑Stack Polish)
+
+- **Backend**: Refactored service layer – extracted helpers, unified role/permission resolution, added duplicate resource detection (409), improved authorization annotations, added audit logging to all mutation services, removed stubs, upgraded to Java 17 idioms.
+- **Frontend**: Replaced default Vite CSS with a clean reset; extracted shared date formatter; unified service object pattern; removed leftover dev comments; cleaned up form ref handling; updated dashboard copy; applied consistent styling to login page.
+
+---
+
+## 🚀 Next Steps
+
+- Dockerize backend + database + frontend
+- Deploy to a cloud platform (render/railway/vercel)
+
+---
