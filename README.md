@@ -33,7 +33,7 @@ A full‑stack portfolio application demonstrating production‑grade architectu
 ### Authentication
 - JWT‑based stateless auth via `/api/auth/login`
 - Tokens contain username, roles, and permissions
-- Frontend stores token in `localStorage`; apiClient attaches `Authorization: Bearer <token>`
+- apiClient attaches `Authorization: Bearer <token>`
 
 ### Authorization – Two‑Layer
 
