@@ -15,41 +15,28 @@ import java.util.stream.Collectors;
 )
 public interface UserMapper {
 
-    // ---- DTO Mapping ----
     UserResponseDTO toResponse(User user);
 
-    // When creating a new User, ignore DB-managed/service-handled fields
+    // CREATE: ignore id, password, roles (set explicitly in service)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "password", ignore = true) // handled explicitly in UserService
-    @Mapping(target = "active", ignore = true)   // defaulted by service/db
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     User fromCreateDTO(UserCreateDTO dto);
 
-    // When updating, ignore ID
+    // UPDATE: ignore id, password, roles
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
-    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     void updateFromDTO(UserUpdateDTO dto, @MappingTarget User user);
 
-    // PATCH: ignore ID, password, active
+    // PATCH: ignore id, password, roles
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
-    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     void patchFromDTO(UserPatchDTO dto, @MappingTarget User user);
 
-    // ----- Custom mapping methods for roles -----
     default Set<String> mapRolesToStrings(Set<Role> roles) {
         if (roles == null) return null;
         return roles.stream().map(Role::getName).collect(Collectors.toSet());
-    }
-
-    default Set<Role> mapStringsToRoles(Set<String> roleNames) {
-        if (roleNames == null) return null;
-        return roleNames.stream()
-                .map(name -> {
-                    Role role = new Role();
-                    role.setName(name); // minimal stub; service layer can fetch full entity
-                    return role;
-                })
-                .collect(Collectors.toSet());
     }
 }

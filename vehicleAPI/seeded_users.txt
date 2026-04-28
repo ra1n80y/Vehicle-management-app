@@ -1,0 +1,9 @@
+Seeded Users Credentials
+
+superadmin / super123 
+admin.ops / admin123 
+fleet.manager / manager123
+vehicle.clerk / clerk123 
+auditor.readonly / audit123 
+fleet.manager2 / manager123
+fleet.manager3 / manager123

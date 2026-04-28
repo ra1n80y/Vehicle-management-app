@@ -1,17 +1,18 @@
 package com.godfrey.fleet.security.service;
 
-import com.godfrey.fleet.role.Permission;
-import com.godfrey.fleet.role.Role;
 import com.godfrey.fleet.user.User;
 import com.godfrey.fleet.user.UserRepository;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -31,15 +32,13 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new DisabledException("User account is disabled");
         }
 
-        Set<GrantedAuthority> authorities = new HashSet<>();
-
-        for (Role role : user.getRoles()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
-
-            for (Permission permission : role.getPermissions()) {
-                authorities.add(new SimpleGrantedAuthority(permission.getName()));
-            }
-        }
+        Set<GrantedAuthority> authorities = user.getRoles().stream()
+                .flatMap(role -> Stream.concat(
+                        Stream.of(new SimpleGrantedAuthority("ROLE_" + role.getName())),
+                        role.getPermissions().stream()
+                                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                ))
+                .collect(Collectors.toSet());
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),

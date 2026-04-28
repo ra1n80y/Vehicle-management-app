@@ -40,29 +40,59 @@ public class RbacSeeder implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
 
-        Permission read = createPermission(VEHICLE_READ, "Allows reading vehicle data");
-        Permission create = createPermission(VEHICLE_CREATE, "Allows creating vehicles");
-        Permission update = createPermission(VEHICLE_UPDATE, "Allows updating vehicles");
-        Permission delete = createPermission(VEHICLE_DELETE, "Allows deleting vehicles");
+        Permission userRead = createPermission(USER_READ, "Allows reading users");
+        Permission userCreate = createPermission(USER_CREATE, "Allows creating users");
+        Permission userUpdate = createPermission(USER_UPDATE, "Allows updating users");
+        Permission userDelete = createPermission(USER_DELETE, "Allows deleting users");
+
+        Permission vehicleRead = createPermission(VEHICLE_READ, "Allows reading vehicle data");
+        Permission vehicleCreate = createPermission(VEHICLE_CREATE, "Allows creating vehicles");
+        Permission vehicleUpdate = createPermission(VEHICLE_UPDATE, "Allows updating vehicles");
+        Permission vehicleDelete = createPermission(VEHICLE_DELETE, "Allows deleting vehicles");
         Permission ownershipOverride = createPermission(
                 VEHICLE_OWNERSHIP_OVERRIDE,
                 "Allows overriding vehicle ownership checks"
         );
-        Permission logRead = createPermission (AUDIT_READ, "Allows log reading");
+
+        Permission auditRead = createPermission(AUDIT_READ, "Allows reading audit logs");
+
+        Permission roleRead = createPermission(ROLE_READ, "Allows reading roles");
+        Permission roleManage = createPermission(ROLE_MANAGE, "Allows full management of roles");
 
         Role superAdmin = createOrUpdateRole(
                 "SUPERADMIN",
-                mutableSet(read, create, update, delete, ownershipOverride, logRead)
+                mutableSet(
+                        vehicleRead, vehicleCreate, vehicleUpdate, vehicleDelete, ownershipOverride,
+                        auditRead,
+                        userRead, userCreate, userUpdate, userDelete,
+                        roleRead, roleManage
+                )
         );
 
         Role admin = createOrUpdateRole(
                 "ADMIN",
-                mutableSet(read, create, update, delete, ownershipOverride, logRead)
+                mutableSet(
+                        vehicleRead, vehicleCreate, vehicleUpdate, vehicleDelete, ownershipOverride,
+                        auditRead,
+                        userRead, userCreate, userUpdate, userDelete,
+                        roleRead, roleManage
+                )
         );
 
-        Role manager = createOrUpdateRole("MANAGER", mutableSet(read, create, update));
-        Role clerk = createOrUpdateRole("CLERK", mutableSet(read, create));
-        Role auditor = createOrUpdateRole("AUDITOR", mutableSet(read));
+        Role manager = createOrUpdateRole(
+                "MANAGER",
+                mutableSet(vehicleRead, vehicleCreate, vehicleUpdate, userRead)
+        );
+
+        Role clerk = createOrUpdateRole(
+                "CLERK",
+                mutableSet(vehicleRead, vehicleCreate, userRead)
+        );
+
+        Role auditor = createOrUpdateRole(
+                "AUDITOR",
+                mutableSet(vehicleRead, userRead)
+        );
 
         upsertUser("superadmin", "super123", true, mutableSet(superAdmin));
         upsertUser("admin.ops", "admin123", true, mutableSet(admin));
@@ -97,16 +127,12 @@ public class RbacSeeder implements CommandLineRunner {
 
     private void upsertUser(String username, String rawPassword, boolean active, Set<Role> roles) {
         User user = userRepository.findByUsername(username).orElseGet(User::new);
-
         user.setUsername(username);
-
         if (user.getPassword() == null || !passwordEncoder.matches(rawPassword, user.getPassword())) {
             user.setPassword(passwordEncoder.encode(rawPassword));
         }
-
         user.setActive(active);
         user.setRoles(new HashSet<>(roles));
-
         userRepository.save(user);
     }
 

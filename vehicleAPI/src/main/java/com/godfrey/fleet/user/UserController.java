@@ -4,6 +4,7 @@ import com.godfrey.fleet.user.dto.UserCreateDTO;
 import com.godfrey.fleet.user.dto.UserPatchDTO;
 import com.godfrey.fleet.user.dto.UserResponseDTO;
 import com.godfrey.fleet.user.dto.UserUpdateDTO;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
-//@RequiredArgsConstructor
 public class UserController {
 
     private final IUserService userService;
@@ -32,17 +32,19 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserCreateDTO dto) {
+    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO dto) {
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id,
+                                                      @Valid @RequestBody UserUpdateDTO dto) {
         return ResponseEntity.ok(userService.updateUser(id, dto));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> patchUser(@PathVariable Long id, @RequestBody UserPatchDTO dto) {
+    public ResponseEntity<UserResponseDTO> patchUser(@PathVariable Long id,
+                                                     @Valid @RequestBody UserPatchDTO dto) {
         return ResponseEntity.ok(userService.patchUser(id, dto));
     }
 

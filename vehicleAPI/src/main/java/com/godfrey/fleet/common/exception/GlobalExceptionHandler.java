@@ -38,7 +38,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -54,8 +53,22 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)                       // <-- NEW
+    public ResponseEntity<ErrorResponse> handleDuplicateResource(
+            DuplicateResourceException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -64,11 +77,9 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         Map<String, String> errors = new LinkedHashMap<>();
-
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             errors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
-
         ValidationErrorResponse response = new ValidationErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
@@ -77,7 +88,6 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(),
                 errors
         );
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
@@ -87,11 +97,9 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         Map<String, String> errors = new LinkedHashMap<>();
-
         for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
             errors.put(violation.getPropertyPath().toString(), violation.getMessage());
         }
-
         ValidationErrorResponse response = new ValidationErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
@@ -100,7 +108,6 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(),
                 errors
         );
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
@@ -116,7 +123,6 @@ public class GlobalExceptionHandler {
                 "Malformed JSON request",
                 request.getRequestURI()
         );
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
@@ -132,7 +138,6 @@ public class GlobalExceptionHandler {
                 "Invalid username or password",
                 request.getRequestURI()
         );
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
@@ -148,7 +153,6 @@ public class GlobalExceptionHandler {
                 "Authentication failed",
                 request.getRequestURI()
         );
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
@@ -164,7 +168,6 @@ public class GlobalExceptionHandler {
                 "You do not have permission to perform this action",
                 request.getRequestURI()
         );
-
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
@@ -177,7 +180,6 @@ public class GlobalExceptionHandler {
                 request.getMethod(),
                 request.getRequestURI(),
                 ex);
-
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -185,7 +187,6 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred",
                 request.getRequestURI()
         );
-
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

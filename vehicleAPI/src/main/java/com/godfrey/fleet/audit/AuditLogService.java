@@ -1,6 +1,7 @@
 package com.godfrey.fleet.audit;
 
 import com.godfrey.fleet.common.exception.ResourceNotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +28,11 @@ public class AuditLogService implements IAuditLogService {
                 performedBy,
                 LocalDateTime.now()
         );
-
         auditLogRepository.save(auditLog);
     }
 
     @Override
+    @PreAuthorize("hasAuthority(T(com.godfrey.fleet.security.Permissions).AUDIT_READ)")   // <-- moved here
     @Transactional(readOnly = true)
     public List<AuditLogResponseDTO> listAuditLogs() {
         return auditLogRepository.findAllByOrderByPerformedAtDesc()
@@ -41,11 +42,11 @@ public class AuditLogService implements IAuditLogService {
     }
 
     @Override
+    @PreAuthorize("hasAuthority(T(com.godfrey.fleet.security.Permissions).AUDIT_READ)")   // <-- moved here
     @Transactional(readOnly = true)
     public AuditLogResponseDTO getAuditLog(Long id) {
         AuditLog auditLog = auditLogRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Audit log not found with id: " + id));
-
         return auditLogMapper.toResponse(auditLog);
     }
 }
